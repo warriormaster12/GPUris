@@ -3,6 +3,9 @@
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
+
 #include <iostream>
 
 #ifdef NDEBUG
@@ -59,6 +62,15 @@ VulkanRHI::VulkanRHI(GLFWwindow *window) {
   }
   VkQueue graphics_queue = graphics_queue_ret.value();
 
+  VmaAllocatorCreateInfo allocatorCreateInfo = {};
+  allocatorCreateInfo.flags = VMA_ALLOCATOR_CREATE_EXT_MEMORY_BUDGET_BIT;
+  allocatorCreateInfo.vulkanApiVersion = VK_API_VERSION_1_4;
+  allocatorCreateInfo.physicalDevice = physicalDevice;
+  allocatorCreateInfo.device = device;
+  allocatorCreateInfo.instance = instance;
+
+  vmaCreateAllocator(&allocatorCreateInfo, &allocator);
+
   std::cout << "Vulkan initialized" << std::endl;
 }
 
@@ -88,6 +100,7 @@ void VulkanRHI::draw() {}
 
 void VulkanRHI::shutdown() {
   swapchain.destroy(device);
+  vmaDestroyAllocator(allocator);
   vkDestroyDevice(device, nullptr);
   vkDestroySurfaceKHR(instance, surface, nullptr);
   vkb::destroy_debug_utils_messenger(instance, debugMessenger);

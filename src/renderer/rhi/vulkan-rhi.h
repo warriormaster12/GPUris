@@ -1,4 +1,5 @@
 #include "rhi.h"
+#include "vk_mem_alloc.h"
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -36,4 +37,5 @@ private:
   VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE;
   VkSurfaceKHR surface = VK_NULL_HANDLE;
   Swapchain swapchain;
+  VmaAllocator allocator;
 };
