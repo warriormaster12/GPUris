@@ -19,10 +19,6 @@ void Renderer::update() {
     return;
   }
 
-  int width, height;
-  glfwGetWindowSize(window, &width, &height);
-  rhi->swapchainResize(width, height);
-
   rhi->prepareFrame();
   rhi->draw();
 }
