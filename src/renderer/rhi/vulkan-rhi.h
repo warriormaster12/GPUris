@@ -1,5 +1,6 @@
 #include "rhi.h"
 #include "vk_mem_alloc.h"
+#include <memory>
 #include <vector>
 #include <vulkan/vulkan.h>
 
@@ -9,12 +10,24 @@ class VulkanRHI : public RHI {
 public:
   VulkanRHI();
   VulkanRHI(GLFWwindow *p_window);
+  std::shared_ptr<RenderPipeline>
+  createRenderPipeline(RenderPipelineInfo &p_info) override;
   void prepareFrame() override;
-  void draw() override;
-  void shutdown() override;
+  virtual void setupViewport(float width, float height, float minDepth,
+                             float maxDepth) override;
+  virtual void setupScissor(int32_t x, int32_t y, uint32_t width,
+                            uint32_t height) override;
+  virtual void bindPipeline(std::shared_ptr<Pipeline> p_pipeline) override;
+  virtual void draw(uint32_t vertexCount, uint32_t instanceCount,
+                    uint32_t firstVertex, uint32_t firstInstance) override;
+  virtual void drawIndexed() override;
+  virtual void submit() override;
+  virtual void freePipeline(std::shared_ptr<Pipeline> pipeline) override;
+  virtual void shutdown() override;
 
 private:
   void swapchainResize();
+  bool shouldResizeSwapchain();
   void transitionImageLayout(VkImage inputImage, VkImageLayout oldLayout,
                              VkImageLayout newLayout,
                              VkAccessFlags2 srcAccessMask,
@@ -45,6 +58,11 @@ private:
         vkDestroySwapchainKHR(device, swapchain, nullptr);
       }
     }
+  };
+
+  struct VulkanRenderPipeline : RenderPipeline {
+    VkPipelineLayout layout = VK_NULL_HANDLE;
+    VkPipeline pipeline = VK_NULL_HANDLE;
   };
 
   struct PerFrameData {
